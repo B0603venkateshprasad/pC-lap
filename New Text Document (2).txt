@@ -1,83 +1,141 @@
-/**********************************************************
- ✅ FINAL PRODUCT PAGE TRACKING (100% WORKING)
-**********************************************************/
-
 if (typeof b !== "undefined") {
 
-    var url = (b["dom.url"] || "").toLowerCase();
+    var url = window.location.href.toLowerCase();
 
-    /* ✅ RUN ONLY ON PRODUCT PAGE */
-    if (url.indexOf(".html") > -1) {
+    var productName = "";
+    var productPrice = "";
 
-        /* ============================
-           ✅ GET PRODUCT NAME
-        ============================ */
-        var productName = "";
-        var h1El = document.querySelector("h1");
+    var h1 = document.querySelector("h1");
+    if (h1) {
+        productName = h1.innerText.trim().toLowerCase();
+    }
 
-        if (h1El && h1El.innerText) {
-            productName = h1El.innerText
-                .toLowerCase()
-                .split(" - ")[0]
-                .trim();
-        }
+    var price = document.querySelector(".price");
+    if (price) {
+        productPrice = price.innerText
+            .replace("$", "")
+            .replace(".00", "")
+            .trim();
+    }
 
-        /* ============================
-           ✅ GET PRODUCT PRICE
-        ============================ */
-        var productPrice = "";
-        var priceEl = document.querySelector(".price");
+    var category = "women";
+    if (window.location.href.toLowerCase().indexOf("/men") > -1) {
+        category = "men";
+    }
 
-        if (priceEl && priceEl.innerText) {
-            productPrice = priceEl.innerText
-                .replace("$", "")
-                .replace(".00", "")
-                .trim();
-        }
+    /* =========================
+       ✅ HOME PAGE
+    ========================= */
+    if (url.indexOf("home") > -1 || url.endsWith("/")) {
 
-        /* ❗ IMPORTANT: STOP IF EMPTY */
-        if (!productName) {
-            console.log("❌ Product name not found");
-            return;
-        }
+        b.pageName = "usb:information:ecommerce:home pg";
 
-        /* ============================
-           ✅ CATEGORY
-        ============================ */
-        var category = url.indexOf("/men/") > -1 ? "men" : "women";
+        b.prop1 = "information";
+        b.prop2 = "home pg";
+        b.prop30 = "ecommerce";
 
-        /* ============================
-           ✅ PAGE NAME (REQUIRED FORMAT)
-        ============================ */
-        var pageName =
+        b.eVar35 = b.pageName;
+        b.eVar40 = "home pg";
+    }
+
+    /* =========================
+       ✅ PRODUCT PAGE (YOUR CODE)
+    ========================= */
+    else if (url.indexOf(".html") > -1 && url.indexOf("checkout") === -1) {
+
+        b.pageName =
             "usb:information:ecommerce:" +
             category + ":" +
             productName + ":" +
             productPrice +
             ":in stock:product view";
 
-        /* ============================
-           ✅ SET ADOBE VARIABLES
-        ============================ */
-        b.pageName = pageName;
+        b.prop1 = "information";
+        b.prop2 = "products";
+        b.prop30 = "ecommerce";
+        b.prop15 = productName + "-" + productPrice;
+
+        b.products = ";" + productName + ";1;" + productPrice;
+        b.Products = ";" + productName + ";1;" + productPrice;
+
+        b.eVar35 = b.pageName;
+        b.eVar40 = "product view";
+
+        b.events = "prodView";
+    }
+
+    /* =========================
+       ✅ CHECKOUT PAGE
+    ========================= */
+    else if (url.indexOf("checkout") > -1 && url.indexOf("success") === -1) {
+
+        b.pageName = "usb:information:ecommerce:check out:one page";
 
         b.prop1 = "information";
         b.prop2 = "products";
         b.prop30 = "ecommerce";
 
-        b.prop15 = productName + "-" + productPrice;
+        // ✅ NEW: get multiple products
+        var productArray = [];
+        var items = document.querySelectorAll("h1"); // change selector if needed
 
-        /* ✅ MAIN FIX (THIS WAS MISSING BEFORE) */
-        b.products = ";" + productName;
+        items.forEach(function (item) {
+            var name = item.innerText.trim().toLowerCase();
+            if (name) {
+                productArray.push(";" + name);
+            }
+        });
 
-        b.eVar35 = pageName;
-        b.eVar40 = "product view";
+        // fallback (if no multiple found)
+        if (productArray.length === 0 && productName) {
+            productArray.push(";" + productName);
+        }
 
-        /* ============================
-           ✅ DEBUG LOGS
-        ============================ */
-        console.log("✅ PRODUCT TRACKING SUCCESS");
-        console.log("pageName:", b.pageName);
-        console.log("products:", b.products);
+        b.products = productArray.join(",");
+
+        b.eVar35 = b.pageName;
+        b.eVar40 = "check out";
     }
+
+    /* =========================
+       ✅ SUCCESS PAGE
+    ========================= */
+    else if (url.indexOf("success") > -1) {
+
+        b.pageName = "usb:information:ecommerce:check out:one page:success";
+
+        b.prop1 = "information";
+        b.prop2 = "products";
+        b.prop30 = "ecommerce";
+
+        // ✅ NEW: get multiple products
+        var productArray = [];
+        var items = document.querySelectorAll("h1"); // change selector if needed
+
+        items.forEach(function (item) {
+            var name = item.innerText.trim().toLowerCase();
+            if (name) {
+                productArray.push(";" + name);
+            }
+        });
+
+        // fallback
+        if (productArray.length === 0 && productName) {
+            productArray.push(";" + productName);
+        }
+
+        b.products = productArray.join(",");
+
+        b.eVar35 = b.pageName;
+        b.eVar40 = "success";
+
+        b.events = "purchase";
+    }
+
+    /* =========================
+       DEBUG (UNCHANGED)
+    ========================= */
+    console.log("pageName =", b.pageName);
+    console.log("products =", b.products);
+    console.log("events =", b.events);
 }
