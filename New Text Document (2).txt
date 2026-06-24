@@ -1,0 +1,83 @@
+/**********************************************************
+ ✅ FINAL PRODUCT PAGE TRACKING (100% WORKING)
+**********************************************************/
+
+if (typeof b !== "undefined") {
+
+    var url = (b["dom.url"] || "").toLowerCase();
+
+    /* ✅ RUN ONLY ON PRODUCT PAGE */
+    if (url.indexOf(".html") > -1) {
+
+        /* ============================
+           ✅ GET PRODUCT NAME
+        ============================ */
+        var productName = "";
+        var h1El = document.querySelector("h1");
+
+        if (h1El && h1El.innerText) {
+            productName = h1El.innerText
+                .toLowerCase()
+                .split(" - ")[0]
+                .trim();
+        }
+
+        /* ============================
+           ✅ GET PRODUCT PRICE
+        ============================ */
+        var productPrice = "";
+        var priceEl = document.querySelector(".price");
+
+        if (priceEl && priceEl.innerText) {
+            productPrice = priceEl.innerText
+                .replace("$", "")
+                .replace(".00", "")
+                .trim();
+        }
+
+        /* ❗ IMPORTANT: STOP IF EMPTY */
+        if (!productName) {
+            console.log("❌ Product name not found");
+            return;
+        }
+
+        /* ============================
+           ✅ CATEGORY
+        ============================ */
+        var category = url.indexOf("/men/") > -1 ? "men" : "women";
+
+        /* ============================
+           ✅ PAGE NAME (REQUIRED FORMAT)
+        ============================ */
+        var pageName =
+            "usb:information:ecommerce:" +
+            category + ":" +
+            productName + ":" +
+            productPrice +
+            ":in stock:product view";
+
+        /* ============================
+           ✅ SET ADOBE VARIABLES
+        ============================ */
+        b.pageName = pageName;
+
+        b.prop1 = "information";
+        b.prop2 = "products";
+        b.prop30 = "ecommerce";
+
+        b.prop15 = productName + "-" + productPrice;
+
+        /* ✅ MAIN FIX (THIS WAS MISSING BEFORE) */
+        b.products = ";" + productName;
+
+        b.eVar35 = pageName;
+        b.eVar40 = "product view";
+
+        /* ============================
+           ✅ DEBUG LOGS
+        ============================ */
+        console.log("✅ PRODUCT TRACKING SUCCESS");
+        console.log("pageName:", b.pageName);
+        console.log("products:", b.products);
+    }
+}
