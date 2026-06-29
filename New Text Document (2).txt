@@ -5,26 +5,38 @@ if (typeof b !== "undefined") {
     var productName = "";
     var productPrice = "";
 
-    var h1 = document.querySelector("h1");
-    if (h1) {
-        productName = h1.innerText.trim().toLowerCase();
+    /* Product Name */
+    if (typeof utag_data !== "undefined" && utag_data.page_name) {
+        productName = utag_data.page_name.trim().toLowerCase();
+    } else if (typeof utag !== "undefined" && utag.data && utag.data.page_name) {
+        productName = utag.data.page_name.trim().toLowerCase();
+    } else {
+        var h1 = document.querySelector("h1");
+        if (h1) {
+            productName = h1.innerText.trim().toLowerCase();
+        }
     }
 
-    var price = document.querySelector(".price");
-    if (price) {
-        productPrice = price.innerText
-            .replace("$", "")
-            .replace(".00", "")
-            .trim();
+    /* Product Price */
+    if (typeof utag_data !== "undefined" && utag_data.product_unit_price) {
+        productPrice = utag_data.product_unit_price;
+    } else {
+        var price = document.querySelector(".price");
+        if (price) {
+            productPrice = price.innerText
+                .replace("$", "")
+                .replace(".00", "")
+                .trim();
+        }
     }
 
     var category = "women";
-    if (window.location.href.toLowerCase().indexOf("/men") > -1) {
+    if (url.indexOf("/men") > -1) {
         category = "men";
     }
 
     /* =========================
-       ✅ HOME PAGE
+       HOME PAGE
     ========================= */
     if (url === "https://ecommerce.tealiumdemo.com/") {
 
@@ -39,7 +51,7 @@ if (typeof b !== "undefined") {
     }
 
     /* =========================
-       ✅ PRODUCT PAGE
+       PRODUCT PAGE
     ========================= */
     else if (url.indexOf(".html") > -1 && url.indexOf("checkout") === -1) {
 
@@ -56,7 +68,7 @@ if (typeof b !== "undefined") {
         b.prop15 = productName + "-" + productPrice;
 
         b.products = ";" + productName + ";1;" + productPrice;
-        b.Products = ";" + productName + ";1;" + productPrice;
+        b.Products = b.products;
 
         b.eVar35 = b.pageName;
         b.eVar40 = "product view";
@@ -65,40 +77,52 @@ if (typeof b !== "undefined") {
     }
 
     /* =========================
-       ✅ CHECKOUT + CART PAGE
+       CART PAGE
     ========================= */
-   else if (url.indexOf("checkout") > -1 && url.indexOf("success") === -1) {
+    else if (url.indexOf("checkout") > -1 && url.indexOf("success") === -1) {
 
-    /* ✅ FIX: pick exact product name */
-    var cartItem = document.querySelector(".product-item-name strong");
+        var cartItem =
+            document.querySelector("h2.product-name a") ||
+            document.querySelector(".product-name a");
 
-    if (cartItem) {
-        productName = cartItem.innerText.trim().toLowerCase();
+        if (cartItem) {
+            productName = cartItem.innerText.trim().toLowerCase();
+        }
+
+        var cartPrice =
+            document.querySelector(".product-cart-price .price") ||
+            document.querySelector(".price");
+
+        if (cartPrice) {
+            productPrice = cartPrice.innerText
+                .replace("$", "")
+                .replace(".00", "")
+                .trim();
+        }
+
+        b.pageName =
+            "usb:information:ecommerce:" +
+            category + ":" +
+            productName + ":" +
+            productPrice +
+            ":in stock:product view";
+
+        b.prop1 = "information";
+        b.prop2 = "products";
+        b.prop30 = "ecommerce";
+        b.prop15 = productName + "-" + productPrice;
+
+        b.products = ";" + productName + ";1;" + productPrice;
+        b.Products = b.products;
+
+        b.eVar35 = b.pageName;
+        b.eVar40 = "product view";
+
+        b.events = "prodView";
     }
 
-    b.pageName =
-        "usb:information:ecommerce:" +
-        category + ":" +
-        productName + ":" +
-        productPrice +
-        ":in stock:product view";
-
-    b.prop1 = "information";
-    b.prop2 = "products";
-    b.prop30 = "ecommerce";
-    b.prop15 = productName + "-" + productPrice;
-
-    b.products = ";" + productName + ";1;" + productPrice;
-    b.Products = ";" + productName + ";1;" + productPrice;
-
-    b.eVar35 = b.pageName;
-    b.eVar40 = "product view";
-
-    b.events = "prodView";
-}
-
     /* =========================
-       ✅ SUCCESS PAGE
+       SUCCESS PAGE
     ========================= */
     else if (url.indexOf("success") > -1) {
 
@@ -110,24 +134,17 @@ if (typeof b !== "undefined") {
 
         var successProducts = "";
 
-        var items = document.querySelectorAll(
-            ".product-item-name a, .product-item-name"
-        );
+        var items = document.querySelectorAll("h2.product-name a, .product-name a");
 
-        items.forEach(function (el, index) {
-            var name = el.innerText ? el.innerText.trim().toLowerCase() : "";
+        items.forEach(function (el) {
+            var name = el.innerText.trim().toLowerCase();
 
-            if (name) {
-                if (successProducts !== "") {
-                    successProducts += ",";
-                }
-                successProducts += ";" + name + ";1";
+            if (successProducts !== "") {
+                successProducts += ",";
             }
-        });
 
-        if (!successProducts && productName) {
-            successProducts = ";" + productName + ";1";
-        }
+            successProducts += ";" + name + ";1";
+        });
 
         b.products = successProducts;
 
@@ -137,9 +154,11 @@ if (typeof b !== "undefined") {
         b.events = "purchase";
     }
 
-    /* =========================
-       ✅ DEBUG
-    ========================= */
+    /* ✅ ONLY ADD THIS FIX */
+    if (url.indexOf("checkout") > -1 && url.indexOf("success") === -1) {
+        b.pageName = "usb:information:ecommerce:check out:one page";
+    }
+
     console.log("pageName =", b.pageName);
     console.log("products =", b.products);
     console.log("events =", b.events);
